@@ -1,0 +1,13 @@
+spring:
+  security:
+    enabled: false
+  datasource:
+    url: jdbc:mysql://localhost:3306/money_management_db
+    username: root
+    password: holamundo
+  encryption:
+    secret: ${ENCRYPTION_SECRET}
+  jwt:
+    access-token-secret: my-secret-access-token
+  server:
+    port: 8080
