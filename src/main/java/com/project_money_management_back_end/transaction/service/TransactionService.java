@@ -3,9 +3,11 @@ package com.project_money_management_back_end.transaction.service;
 import com.project_money_management_back_end.budget.model.Budget;
 import com.project_money_management_back_end.budget.repository.BudgetRepository;
 import com.project_money_management_back_end.budget.service.BudgetService;
+import com.project_money_management_back_end.transaction.dto.IncomeExpenseStatisticsDTO;
 import com.project_money_management_back_end.transaction.dto.TransactionRequestCreatingDTO;
 import com.project_money_management_back_end.transaction.dto.TransactionRequestUpdatingDTO;
 import com.project_money_management_back_end.transaction.dto.TransactionResponseDTO;
+import com.project_money_management_back_end.transaction.enums.TransactionType;
 import com.project_money_management_back_end.transaction.model.Transaction;
 import com.project_money_management_back_end.transaction.repository.TransactionRepository;
 import com.project_money_management_back_end.utils.EncryptionUtil;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.NoSuchElementException;
 
 @Service
@@ -130,5 +133,60 @@ public class TransactionService {
 
         // Delete the transaction
         transactionRepository.delete(transaction);
+    }
+
+    public IncomeExpenseStatisticsDTO getIncomeExpenseStatistics(String username) throws Exception {
+
+        // Retrieve the user's budget
+        Budget budget = budgetRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("Budget not found for username: " + username));
+
+        // Retrieve all income transactions
+        BigDecimal totalIncome = transactionRepository.findAllByUsernameAndType(username, TransactionType.INCOME)
+                .stream()
+                .map(transaction -> {
+                    try {
+                        return new BigDecimal(encryptionUtil.decrypt(transaction.getEncrypted_amount()));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        String totalIncomeString = totalIncome.setScale(2, RoundingMode.HALF_UP).toString();
+
+        // Retrieve all expense transactions
+        BigDecimal totalExpenses = transactionRepository.findAllByUsernameAndType(username, TransactionType.EXPENSE)
+                .stream()
+                .map(transaction -> {
+                    try {
+                        return new BigDecimal(encryptionUtil.decrypt(transaction.getEncrypted_amount()));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        String totalExpensesString = totalExpenses.setScale(2, RoundingMode.HALF_UP).toString();
+
+        // Calculate the combined total (income + expenses)
+        BigDecimal combinedTotal = totalIncome.add(totalExpenses);
+
+        // Calculate the percentages
+        BigDecimal incomePercentage = combinedTotal.compareTo(BigDecimal.ZERO) == 0
+                ? BigDecimal.ZERO
+                : totalIncome.divide(combinedTotal, 6, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal expensePercentage = combinedTotal.compareTo(BigDecimal.ZERO) == 0
+                ? BigDecimal.ZERO
+                : totalExpenses.divide(combinedTotal, 6, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(2, RoundingMode.HALF_UP);
+
+        String incomePercentageFormatted = incomePercentage.setScale(2, RoundingMode.HALF_UP) + "%";
+        String expensePercentageFormatted = expensePercentage.setScale(2, RoundingMode.HALF_UP) + "%";
+
+        return new IncomeExpenseStatisticsDTO(totalIncomeString, totalExpensesString, incomePercentageFormatted, expensePercentageFormatted);
     }
 }

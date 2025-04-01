@@ -1,5 +1,6 @@
 package com.project_money_management_back_end.transaction.controller;
 
+import com.project_money_management_back_end.transaction.dto.IncomeExpenseStatisticsDTO;
 import com.project_money_management_back_end.transaction.dto.TransactionRequestCreatingDTO;
 import com.project_money_management_back_end.transaction.dto.TransactionRequestUpdatingDTO;
 import com.project_money_management_back_end.transaction.dto.TransactionResponseDTO;
@@ -153,6 +154,30 @@ public class TransactionController {
         try {
             transactionService.deleteTransaction(transactionId);
             return ResponseEntity.ok("Transaction successfully deleted.");
+        } catch (NoSuchElementException e) {
+            ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        } catch (Exception e) {
+            ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @Operation(summary = "Get income and expense statistics for a user",
+            description = "Retrieve income, expense, and budget statistics, including percentages calculated from the user's budget.",
+            tags = {"Transactions"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved income and expense statistics",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = IncomeExpenseStatisticsDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Budget not found for the specified username"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/statistics/{username}")
+    public ResponseEntity<Object> getIncomeExpenseStatistics(@PathVariable String username) {
+        try {
+            IncomeExpenseStatisticsDTO statistics = transactionService.getIncomeExpenseStatistics(username);
+            return ResponseEntity.ok(statistics);
         } catch (NoSuchElementException e) {
             ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);

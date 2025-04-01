@@ -8,6 +8,7 @@ import com.project_money_management_back_end.transaction.enums.TransactionType;
 import com.project_money_management_back_end.transaction.model.Transaction;
 import com.project_money_management_back_end.transaction.repository.TransactionRepository;
 import com.project_money_management_back_end.utils.EncryptionUtil;
+import jakarta.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
