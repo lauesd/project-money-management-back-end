@@ -3,14 +3,17 @@ package com.project_money_management_back_end.budget.service;
 import com.project_money_management_back_end.budget.dto.BudgetResponseDTO;
 import com.project_money_management_back_end.budget.model.Budget;
 import com.project_money_management_back_end.budget.repository.BudgetRepository;
+import com.project_money_management_back_end.transaction.dto.TransactionResponseDTO;
 import com.project_money_management_back_end.transaction.enums.TransactionType;
 import com.project_money_management_back_end.transaction.model.Transaction;
+import com.project_money_management_back_end.transaction.repository.TransactionRepository;
 import com.project_money_management_back_end.utils.EncryptionUtil;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -18,6 +21,9 @@ import java.util.NoSuchElementException;
 public class BudgetService {
 
     private BudgetRepository budgetRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     private EncryptionUtil encryptionUtil;
 
@@ -27,22 +33,50 @@ public class BudgetService {
         this.encryptionUtil = encryptionUtil;
     }
 
-    public BudgetResponseDTO getBudgetByUsername(String username) {
+    public BudgetResponseDTO getBudgetByUsername(String username) throws Exception {
         Budget budget = budgetRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("Budget not found for username: " + username));
 
-        String decryptedAmount = null;
+        List<Transaction> incomeTransactions = transactionRepository.findAllByUsernameAndType(username, TransactionType.INCOME);
+        List<Transaction> expenseTransactions = transactionRepository.findAllByUsernameAndType(username, TransactionType.EXPENSE);
 
-        try {
-            String encryptedAmount = budget.getEncrypted_amount();
+        List<TransactionResponseDTO> incomeTransactionDTOs = incomeTransactions.stream()
+                .map(transaction -> {
+                    try {
+                        return new TransactionResponseDTO(
+                                transaction.getTransaction_id(),
+                                transaction.getType(),
+                                encryptionUtil.decrypt(transaction.getEncrypted_name()),
+                                encryptionUtil.decrypt(transaction.getEncrypted_amount()));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .toList();
 
-            decryptedAmount = encryptionUtil.decrypt(encryptedAmount);
+        List<TransactionResponseDTO> expenseTransactionDTOs = expenseTransactions.stream()
+                .map(transaction -> {
+                    try {
+                        return new TransactionResponseDTO(
+                                transaction.getTransaction_id(),
+                                transaction.getType(),
+                                encryptionUtil.decrypt(transaction.getEncrypted_name()),
+                                encryptionUtil.decrypt(transaction.getEncrypted_amount()));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .toList();
 
-        } catch (Exception e) {
-            throw new RuntimeException("Error decrypting the budget for the user: " + username, e);
-        }
+        String decryptedAmount = encryptionUtil.decrypt(budget.getEncrypted_amount());
 
-        return new BudgetResponseDTO(budget.getUsername(), decryptedAmount);
+
+        return new BudgetResponseDTO(
+                budget.getUsername(),
+                decryptedAmount,
+                incomeTransactionDTOs,
+                expenseTransactionDTOs
+        );
     }
 
     public void updateBudget(Transaction transaction) throws Exception {

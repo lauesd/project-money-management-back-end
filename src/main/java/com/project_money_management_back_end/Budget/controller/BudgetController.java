@@ -27,7 +27,7 @@ public class BudgetController {
     private BudgetService budgetService;
 
     @Operation(summary = "Get budget for a specific user",
-            description = "Retrieve the budget details of the user including the username and the budget amount.",
+            description = "Fetch the budget details including the transactions of a user, separated by type (INCOME and EXPENSE).",
             tags = {"Budget"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the budget",
