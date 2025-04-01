@@ -11,3 +11,10 @@ spring:
     access-token-secret: my-secret-access-token
   server:
     port: 8080
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true

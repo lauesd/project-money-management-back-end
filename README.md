@@ -3,11 +3,11 @@ This is the back-end of this project.
 
 # User stories
 
-## 1. As a user, I want to view my total personal budget.
+## 1. As a user, I want to view my total personal transaction.
 
 **Acceptance Criteria**:
-- The personal budget  must have the following attributes:
-  - **Amount**: The monetary value or expected amount for the budget (e.g., "$3,000").
+- The personal transaction  must have the following attributes:
+  - **Amount**: The monetary value or expected amount for the transaction (e.g., "$3,000").
 
 **Security**:
 - The software must use strong encryption (e.g., AES-256) to protect all financial data, including income records.
@@ -17,7 +17,7 @@ This is the back-end of this project.
 **non-functional requirement**
 - The software must be responsive and accesible
 
-## 2. As a user, I want to add my income sources to my personal budget.
+## 2. As a user, I want to add my income sources to my personal transaction.
 
 **Acceptance Criteria**:
 - I can input multiple income sources (e.g., salary, freelance, investments, side business).
@@ -25,7 +25,7 @@ This is the back-end of this project.
   - **Name**: A description or title of the income source (e.g., "Salary," "Freelance Work").
   - **Amount**: The monetary value or expected amount for each income source (e.g., "$3,000").
 - I can edit or delete any income source if necessary.
-- The software must automatically update my total budget when a new income source is added or modified.
+- The software must automatically update my total transaction when a new income source is added or modified.
 - The software provides an overview or summary of my total income.
 
 **Security**:
@@ -38,7 +38,7 @@ This is the back-end of this project.
 
 ---
 
-## 3. As a user, I want to add my spending entries to my personal budget.
+## 3. As a user, I want to add my spending entries to my personal transaction.
 
 **Acceptance Criteria**:
 - I can input and view all of my spending entries.
@@ -46,8 +46,8 @@ This is the back-end of this project.
   - **Name**: A description or title of the spending (e.g., "Groceries," "Coffee").
   - **Amount**: The monetary value of the spending (e.g., "$45.00").
 - I can edit or delete any spending entry if needed.
-- The software must automatically update my total budget whenever a new income source is added or modified.
-- The software provides an overview or summary of my total income and the remaining budget after income is added.
+- The software must automatically update my total transaction whenever a new income source is added or modified.
+- The software provides an overview or summary of my total income and the remaining transaction after income is added.
 
 **Security**:
 - The software must use strong encryption (e.g., AES-256) to protect all financial data, including spending records.
@@ -64,7 +64,7 @@ This is the back-end of this project.
 **Acceptance Criteria**:
 - The software must display the total income and total spending.
 - The software must show a comparison between total income and total spending (e.g., a bar chart or percentage comparison).
-- The comparison should indicate whether spending is within the budget, over budget, or under budget.
+- The comparison should indicate whether spending is within the transaction, over transaction, or under transaction.
 
 **Security**:
 - The software must use strong encryption (e.g., AES-256) to protect all financial data, including income and spending records.
